@@ -5,71 +5,158 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sahibba Solver Board</title>
     <style>
+        :root {
+            --board-bg: #e2e8e4;
+            --grid-line: #bdc3c7;
+            --tw-color: #e74c3c; /* Triple Word - Red */
+            --dw-color: #fd79a8; /* Double Word - Pink */
+            --tl-color: #0984e3; /* Triple Letter - Blue */
+            --dl-color: #74b9ff; /* Double Letter - Light Blue */
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: #f4f4f9;
+            min-height: 100vh;
+            background-color: #2c3e50; /* Dark table background */
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* The physical "plastic/wood" casing around the board */
+        #board-casing {
+            background-color: #1a252f;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.1);
+            margin-bottom: 30px;
         }
         
         #board {
             display: grid;
-            /* 15x15 grid layout */
             grid-template-columns: repeat(15, 1fr);
             gap: 2px;
-            width: 600px;
-            height: 600px;
-            background-color: #2c3e50; /* Acts as the border between cells */
-            border: 6px solid #2c3e50;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border-radius: 4px;
+            /* This is the secret to stopping the stretching: */
+            width: 100%;
+            max-width: 650px; 
+            aspect-ratio: 1 / 1; 
+            background-color: var(--grid-line);
+            border: 2px solid var(--grid-line);
         }
 
         .cell {
-            background-color: #e2e8e4;
+            background-color: var(--board-bg);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 11px;
-            font-weight: bold;
-            color: #333;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: rgba(0, 0, 0, 0.4);
+            text-align: center;
             user-select: none;
             position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
         }
 
-        /* Multiplier Colors */
-        .TW { background-color: #e74c3c; color: white; } /* Triple Word - Red */
-        .DW { background-color: #fd79a8; color: white; } /* Double Word - Pink */
-        .TL { background-color: #0984e3; color: white; } /* Triple Letter - Blue */
-        .DL { background-color: #74b9ff; color: white; } /* Double Letter - Light Blue */
-        .ST { background-color: #fd79a8; color: white; font-size: 24px; } /* Center Star */
+        /* Multiplier Styles */
+        .TW { background-color: var(--tw-color); color: white; }
+        .DW { background-color: var(--dw-color); color: white; }
+        .TL { background-color: var(--tl-color); color: white; }
+        .DL { background-color: var(--dl-color); color: white; }
         
-        /* Optional: Class for when your bot places a letter tile */
-        .tile {
-            background-color: #f1c40f;
-            width: 90%;
-            height: 90%;
+        .ST { 
+            background-color: var(--dw-color); 
+            color: white; 
+            font-size: 1.5rem; 
+        }
+
+        /* The player's tile rack */
+        #rack-casing {
+            background-color: #8e44ad; /* Distinct color for the rack */
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 -3px 0 rgba(0,0,0,0.2);
+        }
+
+        #rack {
+            display: flex;
+            gap: 5px;
+        }
+
+        .rack-slot {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
             border-radius: 4px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
+        }
+
+        /* Example of a physical letter tile when your bot places one */
+        .tile {
+            background-color: #f1c40f;
+            width: 92%;
+            height: 92%;
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: bold;
             color: #2c3e50;
-            box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 0 #d4ac0d, 0 5px 5px rgba(0,0,0,0.4); /* 3D pop effect */
             position: absolute;
             z-index: 10;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        /* Small subscript number for tile score */
+        .tile::after {
+            content: attr(data-score);
+            position: absolute;
+            bottom: 2px;
+            right: 4px;
+            font-size: 0.5rem;
+            color: #2c3e50;
+        }
+
+        /* Responsive font sizing for mobile/smaller screens */
+        @media (max-width: 600px) {
+            .cell { font-size: 0.5rem; }
+            .ST { font-size: 1rem; }
+            .rack-slot { width: 35px; height: 35px; }
         }
     </style>
 </head>
 <body>
 
-<div id="board"></div>
+<!-- The Game Board Area -->
+<div id="board-casing">
+    <div id="board"></div>
+</div>
+
+<!-- The Player's Rack Area -->
+<div id="rack-casing">
+    <div id="rack">
+        <!-- 7 slots for the letters in hand -->
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+        <div class="rack-slot"></div>
+    </div>
+</div>
 
 <script>
-    // Standard 15x15 board layout for Sahibba / Scrabble
     const layout = [
         ['TW', '', '', 'DL', '', '', '', 'TW', '', '', '', 'DL', '', '', 'TW'],
         ['', 'DW', '', '', '', 'TL', '', '', '', 'TL', '', '', '', 'DW', ''],
@@ -90,7 +177,7 @@
 
     const boardElement = document.getElementById('board');
 
-    // Generate the grid dynamically into the DOM
+    // Generate the grid
     for (let row = 0; row < 15; row++) {
         for (let col = 0; col < 15; col++) {
             const cellType = layout[row][col];
@@ -100,17 +187,43 @@
             
             if (cellType) {
                 cellElement.classList.add(cellType);
-                // Assign a star icon to the center, otherwise label the multiplier
                 cellElement.innerText = cellType === 'ST' ? '★' : cellType;
             }
             
-            // Assign coordinate data attributes for your solver engine
+            // X and Y coordinates for your bot to target
             cellElement.dataset.row = row;
             cellElement.dataset.col = col;
 
             boardElement.appendChild(cellElement);
         }
     }
+
+    // --- DEMO: How to place a tile via JavaScript ---
+    // This function shows how your solver bot will eventually push moves to the UI
+    function placeTile(row, col, letter, score) {
+        const targetCell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        if (targetCell) {
+            const tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.innerText = letter;
+            tile.dataset.score = score; // Adds the little number to the bottom right
+            targetCell.appendChild(tile);
+            // Hide the text of the multiplier beneath the tile
+            targetCell.style.color = 'transparent'; 
+        }
+    }
+
+    // Example bot opening move: "SAHIBBA" starting on the center star
+    setTimeout(() => {
+        placeTile(7, 7, 'S', 1);
+        placeTile(7, 8, 'A', 1);
+        placeTile(7, 9, 'H', 4);
+        placeTile(7, 10, 'I', 1);
+        placeTile(7, 11, 'B', 3);
+        placeTile(7, 12, 'B', 3);
+        placeTile(7, 13, 'A', 1);
+    }, 1000); // Renders 1 second after page load
+
 </script>
 
 </body>
