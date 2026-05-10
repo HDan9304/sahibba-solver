@@ -127,11 +127,21 @@
             color: #2c3e50;
         }
 
-        /* Responsive font sizing for mobile/smaller screens */
-        @media (max-width: 600px) {
-            .cell { font-size: 0.5rem; }
-            .ST { font-size: 1rem; }
-            .rack-slot { width: 35px; height: 35px; }
+        /* Responsive scaling for mobile/smaller screens */
+        @media (max-width: 650px) {
+            body { padding: 5px; }
+            #board-casing { padding: 6px; margin-bottom: 15px; }
+            #board { gap: 1px; }
+            .cell { font-size: 2.2vw; }
+            .ST { font-size: 4.5vw; }
+            .rack-slot { width: 11vw; height: 11vw; }
+            
+            .tile { font-size: 4.5vw; border-radius: 2px; }
+            .tile::after { 
+                font-size: 1.8vw; 
+                bottom: 1px; 
+                right: 2px; 
+            }
         }
     </style>
 </head>
